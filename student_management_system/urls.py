@@ -25,6 +25,10 @@ from student_management_system import settings
 from student_management_app import views
 
 urlpatterns = [
+    path('', views.showLoginPage),
     path('demo/', views.showDemoPage),
     path('admin/', admin.site.urls),
+    path('doLogin', views.doLogin),
+    path('get_user_details', views.GetUserDetails),
+    path('logout_user', views.logout_user),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
