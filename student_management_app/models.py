@@ -22,7 +22,7 @@ class AdminHOD(models.Model):
 class Staffs(models.Model):
     id=models.AutoField(primary_key=True)
     admin=models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    adress=models.TextField()
+    address=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
@@ -54,7 +54,7 @@ class Students(models.Model):
     admin=models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     gender=models.CharField(max_length=255)
     profile_pic=models.FileField()
-    adress=models.TextField()
+    address=models.TextField()
     course_id=models.ForeignKey(Courses, on_delete=models.DO_NOTHING)
     session_start_year=models.DateField()
     session_end_year=models.DateField()

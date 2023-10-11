@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 from student_management_system import settings
 
 # importacion para ver las vistas de las paginas de la app
-from student_management_app import views
+from student_management_app import views, HodViews
 
 urlpatterns = [
     path('', views.showLoginPage),
@@ -31,4 +31,7 @@ urlpatterns = [
     path('doLogin', views.doLogin),
     path('get_user_details', views.GetUserDetails),
     path('logout_user', views.logout_user),
+    path('admin_home', HodViews.admin_home),
+    path('add_staff', HodViews.add_staff),
+    path('add_staff_save', HodViews.add_staff_save)
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
