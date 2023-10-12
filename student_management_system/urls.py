@@ -32,6 +32,14 @@ urlpatterns = [
     path('get_user_details', views.GetUserDetails),
     path('logout_user', views.logout_user),
     path('admin_home', HodViews.admin_home),
+    # Para agregar staff y guardarlo
     path('add_staff', HodViews.add_staff),
-    path('add_staff_save', HodViews.add_staff_save)
+    path('add_staff_save', HodViews.add_staff_save),
+    # Para agregar course y guardarlo
+    path('add_course', HodViews.add_course),
+    path('add_course_save', HodViews.add_course_save),
+    # Para agregar student y guardarlo
+    path('add_student', HodViews.add_student),
+    path('add_student_save', HodViews.add_student_save),
+
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
