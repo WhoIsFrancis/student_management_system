@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.contrib import messages 
 
-from student_management_app.models import CustomUser, Staffs, Courses
+from student_management_app.models import CustomUser, Staffs, Courses, Students, Subjects
 
 def admin_home(request):
     return render(request, "hod_template/home_content.html")
@@ -115,4 +115,53 @@ def add_student_save(request):
             # Maneja otras excepciones generales
             messages.error(request, f"An error occurred: {e}")
             return HttpResponseRedirect("/add_student")
+
+
+def add_subject(request):
+    courses=Courses.objects.all()
+    staffs=CustomUser.objects.filter(user_type=2)
+    return render(request, "hod_template/add_subject_template.html", {"staffs":staffs, "courses":courses})
+
+
+def add_subject_save(request):
+    if request.method != "POST":
+        return HttpResponse("Method Not Allowed!")
+    else:
+        subject_name=request.POST.get("subject_name")
+        course_id=request.POST.get("course")
+        course=Courses.POST.get(id=course_id)
+        staff_id=request.POST.get("staff")
+        staff=CustomUser.POST.get(id=staff_id)
+
+        try:
+            subject=Subjects(subject_name=subject_name, course_id=course, staff_id=staff)
+            subject.save()
+            messages.success(request, "Successfully added Subject")
+            return HttpResponseRedirect("/add_subject")
         
+        except IntegrityError as e:
+            # Maneja la excepción de violación de integridad (por ejemplo, si el usuario ya existe)
+            messages.error(request, f"Failed to add Subject: {e}")
+            return HttpResponseRedirect("/add_subject")
+        
+        except Exception as e:
+            # Maneja otras excepciones generales
+            messages.error(request, f"An error occurred: {e}")
+            return HttpResponseRedirect("/add_subject")
+        
+
+def manage_staff(request):
+    staffs = Staffs.objects.all()
+    return render(request, "hod_template/manage_staff_template.html", {"staffs":staffs} )
+
+def manage_student(request):
+    students = Students.objects.all()
+    return render(request, "hod_template/manage_student_template.html", {"students":students} )
+
+def manage_course(request):
+    courses = Courses.objects.all()
+    return render(request, "hod_template/manage_course_template.html", {"courses": courses})
+
+def manage_subject(request):
+    subjects = Subjects.objects.all()
+    return render(request, "hod_template/manage_subject_template.html", {"subjects": subjects})

@@ -41,5 +41,17 @@ urlpatterns = [
     # Para agregar student y guardarlo
     path('add_student', HodViews.add_student),
     path('add_student_save', HodViews.add_student_save),
+    # Para agregar subject
+    path('add_subject', HodViews.add_subject),
+    path('add_subject_save', HodViews.add_subject_save),
+    # Administrar staff
+    path('manage_staff', HodViews.manage_staff),
+    # Administrar student
+    path('manage_student', HodViews.manage_student),
+    # Administrar cursos
+    path('manage_course', HodViews.manage_course),
+    # Administrar subject
+    path('manage_subject', HodViews.manage_subject),
+
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
