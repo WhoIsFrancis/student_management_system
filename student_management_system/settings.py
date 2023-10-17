@@ -50,6 +50,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Middleware para proteger las rutas
+    'student_management_app.loginCheckMiddleware.LoginCheckMiddleware'
 ]
 
 ROOT_URLCONF = 'student_management_system.urls'
