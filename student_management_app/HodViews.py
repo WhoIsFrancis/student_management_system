@@ -2,7 +2,9 @@ import datetime
 from MySQLdb import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.contrib import messages 
+from django.contrib import messages
+from django.urls import reverse
+from student_management_app.forms import AddStudentForm , EditStudentForm
 
 from student_management_app.models import CustomUser, Staffs, Courses, Students, Subjects
 from django.core.files.storage import FileSystemStorage
@@ -30,17 +32,17 @@ def add_staff_save(request):
             user.staffs.address=address
             user.save()
             messages.success(request, "Successfully added Staff")
-            return HttpResponseRedirect("/add_staff")
+            return HttpResponseRedirect(reverse("add_staff"))
         
         except IntegrityError as e:
             # Maneja la excepción de violación de integridad (por ejemplo, si el usuario ya existe)
             messages.error(request, f"Failed to add Staff: {e}")
-            return HttpResponseRedirect("/add_staff")
+            return HttpResponseRedirect(reverse("add_staff"))
         
         except Exception as e:
             # Maneja otras excepciones generales
             messages.error(request, f"An error occurred: {e}")
-            return HttpResponseRedirect("/add_staff")
+            return HttpResponseRedirect(reverse("add_staff"))
         
 
 def add_course(request):
@@ -56,72 +58,80 @@ def add_course_save(request):
             course_model = Courses(course_name=course)
             course_model.save()
             messages.success(request, "Successfully added Course")
-            return HttpResponseRedirect("/add_course")
+            return HttpResponseRedirect(reverse("add_course"))
         
         except IntegrityError as e:
             # Maneja la excepción de violación de integridad (por ejemplo, si el curso ya existe)
             messages.error(request, f"Failed to add Course: {e}")
-            return HttpResponseRedirect("/add_course")
+            return HttpResponseRedirect(reverse("add_course"))
         
         except Exception as e:
             # Maneja otras excepciones generales
             messages.error(request, f"An error occurred: {e}")
-            return HttpResponseRedirect("/add_course")
+            return HttpResponseRedirect(reverse("add_course"))
 
         except: 
             messages.error(request, "Failed to add course")
-            return HttpResponseRedirect("/add_course")
+            return HttpResponseRedirect(reverse("add_course"))
 
 
 def add_student(request):
-    courses=Courses.objects.all()
-    return render(request, "hod_template/add_student_template.html", {"courses":courses})
+    # courses=Courses.objects.all()
+    # Le pasamos el forms creado
+    form=AddStudentForm()
+    return render(request, "hod_template/add_student_template.html", {"form": form})
 
 def add_student_save(request):
     if request.method != "POST":
         return HttpResponse("<h2> Method not allowed <h2>")
     else:
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        address = request.POST.get("address")
-        session_start = request.POST.get("session_start")
-        session_end = request.POST.get("session_end")
-        course_id = request.POST.get("course")
-        sex = request.POST.get("sex")
+        # acceder a la data desde form
+        form = AddStudentForm(request.POST, request.FILES)
+        if form.is_valid():
+            first_name = form.cleaned_data["first_name"]
+            last_name = form.cleaned_data["last_name"]
+            username = form.cleaned_data["username"]
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
+            address = form.cleaned_data["address"]
+            session_start = form.cleaned_data["session_start"]
+            session_end = form.cleaned_data["session_end"]
+            course_id = form.cleaned_data["course"]
+            sex = form.cleaned_data["sex"]
 
-        # Subir archivo de img para el add_student_save
-        profile_pic = request.FILES['profile_pic']
-        fs = FileSystemStorage()
-        filename = fs.save(profile_pic.name, profile_pic)
-        profile_pic_url = fs.url(filename) 
+            # Subir archivo de img para el add_student_save, ya no es necesario subir una imagen para guardar
+            profile_pic = request.FILES['profile_pic']
+            fs = FileSystemStorage()
+            filename = fs.save(profile_pic.name, profile_pic)
+            profile_pic_url = fs.url(filename)
 
 
-        try:
-            # Intenta crear un nuevo usuario de tipo "Student"
-            user = CustomUser.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=3)
-            user.students.address=address
-            course_obj=Courses.objects.get(id=course_id)
-            user.students.course_id=course_obj
-            user.students.session_start_year=session_start
-            user.students.session_end_year=session_end
-            user.students.gender=sex
-            user.students.profile_pic=profile_pic_url
-            user.save()
-            messages.success(request, "Successfully added Student")
-            return HttpResponseRedirect("/add_student")
-        
-        except IntegrityError as e:
-            # Maneja la excepción de violación de integridad (por ejemplo, si el usuario ya existe)
-            messages.error(request, f"Failed to add Student: {e}")
-            return HttpResponseRedirect("/add_student")
-        
-        except Exception as e:
-            # Maneja otras excepciones generales
-            messages.error(request, f"An error occurred: {e}")
-            return HttpResponseRedirect("/add_student")
+            try:
+                # Intenta crear un nuevo usuario de tipo "Student"
+                user = CustomUser.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=3)
+                user.students.address=address
+                course_obj=Courses.objects.get(id=course_id)
+                user.students.course_id=course_obj
+                user.students.session_start_year=session_start
+                user.students.session_end_year=session_end
+                user.students.gender=sex
+                user.students.profile_pic=profile_pic_url
+                user.save()
+                messages.success(request, "Successfully added Student")
+                return HttpResponseRedirect(reverse("add_student"))
+            
+            except IntegrityError as e:
+                # Maneja la excepción de violación de integridad (por ejemplo, si el usuario ya existe)
+                messages.error(request, f"Failed to add Student: {e}")
+                return HttpResponseRedirect(reverse("add_student"))
+            
+            except Exception as e:
+                # Maneja otras excepciones generales
+                messages.error(request, f"An error occurred: {e}")
+                return HttpResponseRedirect(reverse("add_student"))
+        else:
+            form=AddStudentForm(request.POST)
+            return render(request, "hod_template/add_student_template.html", {"form":form})
 
 
 def add_subject(request):
@@ -144,17 +154,17 @@ def add_subject_save(request):
             subject=Subjects(subject_name=subject_name, course_id=course, staff_id=staff)
             subject.save()
             messages.success(request, "Successfully added Subject")
-            return HttpResponseRedirect("/add_subject")
+            return HttpResponseRedirect(reverse("add_subject"))
         
         except IntegrityError as e:
             # Maneja la excepción de violación de integridad (por ejemplo, si el usuario ya existe)
             messages.error(request, f"Failed to add Subject: {e}")
-            return HttpResponseRedirect("/add_subject")
+            return HttpResponseRedirect(reverse("add_subject"))
         
         except Exception as e:
             # Maneja otras excepciones generales
             messages.error(request, f"An error occurred: {e}")
-            return HttpResponseRedirect("/add_subject")
+            return HttpResponseRedirect(reverse("add_subject"))
         
 
 # Manage staff, student, course, subject
@@ -178,7 +188,7 @@ def manage_subject(request):
 # Edit staff, student, course, subject
 def edit_staff(request, staff_id):
     staff = Staffs.objects.get(admin=staff_id)
-    return render(request, "hod_template/edit_staff_template.html", {"staff": staff})
+    return render(request, "hod_template/edit_staff_template.html", {"staff": staff , "id":staff_id})
 
 def edit_staff_save(request):
     if request.method != 'POST':
@@ -204,79 +214,98 @@ def edit_staff_save(request):
             staff_model.save()
 
             messages.success(request, "Successfully edited staff")
-            return HttpResponseRedirect("/edit_staff/"+staff_id)
+            return HttpResponseRedirect(reverse("edit_staff", kwargs={"staff_id": staff_id}))
         
         except:
             messages.error(request, "Failed to edit Staff")
-            return HttpResponseRedirect("/edit_staff/"+staff_id)
+            return HttpResponseRedirect(reverse("edit_staff",  kwargs={"staff_id": staff_id}))
         
 def edit_student(request, student_id):
+    request.session['student_id']=student_id
     student = Students.objects.get(admin=student_id)
-    courses = Courses.objects.all()
-    return render(request, "hod_template/edit_student_template.html", {"student": student, "courses": courses})
+    form = EditStudentForm()
+    form.fields['email'].initial=student.admin.email
+    form.fields['first_name'].initial=student.admin.first_name
+    form.fields['last_name'].initial=student.admin.last_name
+    form.fields['username'].initial=student.admin.username
+    form.fields['address'].initial=student.address
+    form.fields['course'].initial=student.course_id.id
+    form.fields['sex'].initial=student.gender
+    form.fields['session_start'].initial=student.session_start_year
+    form.fields['session_end'].initial=student.session_end_year
+    return render(request, "hod_template/edit_student_template.html", {"form": form, "id":student_id, "username": student.admin.username})
 
 def edit_student_save(request):
     if request.method != "POST":
         return HttpResponse("<h2> Method not allowed <h2>")
     else:
-        student_id=request.POST.get("student_id")
-
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        address = request.POST.get("address")
-        session_start = request.POST.get("session_start")
-        session_end = request.POST.get("session_end")
-        course_id = request.POST.get("course")
-        sex = request.POST.get("sex")
-
-        # Actualizar profile_pic
-        if request.FILES['profile_pic']:
-            profile_pic = request.FILES['profile_pic']
-            fs = FileSystemStorage()
-            filename = fs.save(profile_pic.name, profile_pic)
-            profile_pic_url = fs.url(filename)
-        else:
-            profile_pic_url = None
-            
-        try:
-            user = CustomUser.objects.get(id=student_id)
-            # Actualiza la data del objeto CustomUser
-            user.first_name=first_name
-            user.last_name=last_name
-            user.username=username
-            user.email=email
-            user.save()
-            
-            student= Students.objects.get(admin=student_id)
-            # Actualiza la data del objeto Student
-            student.address=address
-            student.session_start_year=session_start
-            student.session_end_year=session_end
-            student.gender=sex
-
-            # Accediendo al objeto Course para setear el curso en student
-            course = Courses.objects.get(id=course_id)
-            student.course_id=course
-            
-            if profile_pic_url != None:
-                student.profile_pic=profile_pic_url
-            student.save()
-
-            messages.success(request, "Successfully edited student")
-            return HttpResponseRedirect("edit_student/"+student_id)
+        student_id=request.session.get("student_id")
+        if student_id == None:
+            return HttpResponseRedirect(reverse("manage_student"))
         
-        except:
-            messages.error(request, "Failed to edit student")
-            return HttpResponseRedirect("edit_student/"+student_id)
+        form=EditStudentForm(request.POST, request.FILES)
 
+        if form.is_valid():
+            first_name = form.cleaned_data["first_name"]
+            last_name = form.cleaned_data["last_name"]
+            username = form.cleaned_data["username"]
+            email = form.cleaned_data["email"]
+            address = form.cleaned_data["address"]
+            session_start = form.cleaned_data["session_start"]
+            session_end = form.cleaned_data["session_end"]
+            course_id = form.cleaned_data["course"]
+            sex = form.cleaned_data["sex"]
+
+            # Actualizar profile_pic
+            if request.FILES.get('profile_pic', False):
+                profile_pic = request.FILES['profile_pic']
+                fs = FileSystemStorage()
+                filename = fs.save(profile_pic.name, profile_pic)
+                profile_pic_url = fs.url(filename)
+            else:
+                profile_pic_url = None
+                
+            try:
+                user = CustomUser.objects.get(id=student_id)
+                # Actualiza la data del objeto CustomUser
+                user.first_name=first_name
+                user.last_name=last_name
+                user.username=username
+                user.email=email
+                user.save()
+                
+                student= Students.objects.get(admin=student_id)
+                # Actualiza la data del objeto Student
+                student.address=address
+                student.session_start_year=session_start
+                student.session_end_year=session_end
+                student.gender=sex
+
+                # Accediendo al objeto Course para setear el curso en student
+                course = Courses.objects.get(id=course_id)
+                student.course_id=course
+                
+                if profile_pic_url != None:
+                    student.profile_pic=profile_pic_url
+                student.save()
+                del request.session['student_id']
+
+                messages.success(request, "Successfully edited student")
+                return HttpResponseRedirect(reverse("edit_student",  kwargs={"student_id": student_id}))
+            
+            except:
+                messages.error(request, "Failed to edit student")
+                return HttpResponseRedirect(reverse("edit_student", kwargs={"student_id": student_id}))
+        else:
+            form = EditStudentForm(request.POST)
+            student =Students.objects.get(admin=student_id)
+            return render(request, "hod_template/edit_student_template.html", {"form":form, "id":id, "username":username})
 
 def edit_subject(request, subject_id):
     subject= Subjects.objects.get(id=subject_id)
     courses= Courses.objects.all()
     staffs= CustomUser.objects.filter(user_type=2)
-    return render(request, "hod_template/edit_subject_template.html", {"subject": subject, "staffs":staffs, "courses": courses})
+    return render(request, "hod_template/edit_subject_template.html", {"subject": subject, "staffs":staffs, "courses": courses, "id":subject_id})
 
 
 def edit_subject_save(request):
@@ -301,16 +330,16 @@ def edit_subject_save(request):
 
             subject.save()
             messages.success(request, "Successfully edited subject")
-            return HttpResponseRedirect("edit_subject/"+subject_id)
+            return HttpResponseRedirect(reverse("edit_subject" , kwargs={"subject_id": subject_id}))
         
         except:
             messages.error(request, "Failed to edit subject")
-            return HttpResponseRedirect("edit_subject/"+subject_id)
+            return HttpResponseRedirect(reverse("edit_subject" , kwargs={"subject_id": subject_id}))
 
 
 def edit_course(request, course_id):
     course=Courses.objects.get(id=course_id)
-    return render(request, "hod_template/edit_course_template.html", {"course": course})
+    return render(request, "hod_template/edit_course_template.html", {"course": course, "id":course_id})
 
 
 def edit_course_save(request):
@@ -325,9 +354,9 @@ def edit_course_save(request):
             course.course_name = course_name
             course.save()
             messages.success(request, "Successfully edited course")
-            return HttpResponseRedirect("edit_course/"+course_id)
+            return HttpResponseRedirect(reverse("edit_course" , kwargs={"course_id": course_id}))
         
         except:
             messages.error(request, "Failed to edit course")
-            return HttpResponseRedirect("edit_course/"+course_id)
+            return HttpResponseRedirect(reverse("edit_course" , kwargs={"course_id": course_id}))
 
