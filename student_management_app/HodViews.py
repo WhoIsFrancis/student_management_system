@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.contrib import messages 
 
 from student_management_app.models import CustomUser, Staffs, Courses, Students, Subjects
+from django.core.files.storage import FileSystemStorage
 
 def admin_home(request):
     return render(request, "hod_template/home_content.html")
@@ -91,6 +92,12 @@ def add_student_save(request):
         course_id = request.POST.get("course")
         sex = request.POST.get("sex")
 
+        # Subir archivo de img para el add_student_save
+        profile_pic = request.FILES['profile_pic']
+        fs = FileSystemStorage()
+        filename = fs.save(profile_pic.name, profile_pic)
+        profile_pic_url = fs.url(filename) 
+
 
         try:
             # Intenta crear un nuevo usuario de tipo "Student"
@@ -101,7 +108,7 @@ def add_student_save(request):
             user.students.session_start_year=session_start
             user.students.session_end_year=session_end
             user.students.gender=sex
-            user.students.profile_pic=""
+            user.students.profile_pic=profile_pic_url
             user.save()
             messages.success(request, "Successfully added Student")
             return HttpResponseRedirect("/add_student")
@@ -129,9 +136,9 @@ def add_subject_save(request):
     else:
         subject_name=request.POST.get("subject_name")
         course_id=request.POST.get("course")
-        course=Courses.POST.get(id=course_id)
+        course=Courses.objects.get(id=course_id)
         staff_id=request.POST.get("staff")
-        staff=CustomUser.POST.get(id=staff_id)
+        staff=CustomUser.objects.get(id=staff_id)
 
         try:
             subject=Subjects(subject_name=subject_name, course_id=course, staff_id=staff)
@@ -223,7 +230,16 @@ def edit_student_save(request):
         session_end = request.POST.get("session_end")
         course_id = request.POST.get("course")
         sex = request.POST.get("sex")
-        
+
+        # Actualizar profile_pic
+        if request.FILES['profile_pic']:
+            profile_pic = request.FILES['profile_pic']
+            fs = FileSystemStorage()
+            filename = fs.save(profile_pic.name, profile_pic)
+            profile_pic_url = fs.url(filename)
+        else:
+            profile_pic_url = None
+            
         try:
             user = CustomUser.objects.get(id=student_id)
             # Actualiza la data del objeto CustomUser
@@ -243,6 +259,9 @@ def edit_student_save(request):
             # Accediendo al objeto Course para setear el curso en student
             course = Courses.objects.get(id=course_id)
             student.course_id=course
+            
+            if profile_pic_url != None:
+                student.profile_pic=profile_pic_url
             student.save()
 
             messages.success(request, "Successfully edited student")
@@ -251,3 +270,64 @@ def edit_student_save(request):
         except:
             messages.error(request, "Failed to edit student")
             return HttpResponseRedirect("edit_student/"+student_id)
+
+
+def edit_subject(request, subject_id):
+    subject= Subjects.objects.get(id=subject_id)
+    courses= Courses.objects.all()
+    staffs= CustomUser.objects.filter(user_type=2)
+    return render(request, "hod_template/edit_subject_template.html", {"subject": subject, "staffs":staffs, "courses": courses})
+
+
+def edit_subject_save(request):
+    if request.method != "POST":
+        return HttpResponse("<h2> Method not allowed <h2>")
+    else:
+        subject_id=request.POST.get("subject_id") # leemos los valores del forms
+        subject_name=request.POST.get("subject_name")
+        staff_id=request.POST.get("staff")
+        course_id=request.POST.get("course")
+
+        try: 
+            subject=Subjects.objects.get(id=subject_id)
+            subject.subject_name = subject_name
+            # leer el objeto Staff utilizando el staff id
+            staff = CustomUser.objects.get(id=staff_id)
+            subject.staff_id = staff
+            # leer el objeto Curso utilizando el curso id
+            course=Courses.objects.get(id=course_id)
+            subject.course_id = course
+            subject.save()
+
+            subject.save()
+            messages.success(request, "Successfully edited subject")
+            return HttpResponseRedirect("edit_subject/"+subject_id)
+        
+        except:
+            messages.error(request, "Failed to edit subject")
+            return HttpResponseRedirect("edit_subject/"+subject_id)
+
+
+def edit_course(request, course_id):
+    course=Courses.objects.get(id=course_id)
+    return render(request, "hod_template/edit_course_template.html", {"course": course})
+
+
+def edit_course_save(request):
+    if request.method != "POST":
+        return HttpResponse("<h2> Method not allowed <h2>")
+    else:
+        course_id=request.POST.get("course_id") # leemos los valores del forms
+        course_name=request.POST.get("course")
+
+        try: 
+            course=Courses.objects.get(id=course_id)
+            course.course_name = course_name
+            course.save()
+            messages.success(request, "Successfully edited course")
+            return HttpResponseRedirect("edit_course/"+course_id)
+        
+        except:
+            messages.error(request, "Failed to edit course")
+            return HttpResponseRedirect("edit_course/"+course_id)
+
