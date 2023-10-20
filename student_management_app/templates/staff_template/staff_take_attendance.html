@@ -70,19 +70,14 @@ Take Attendance
 <script>
     $(document).ready(function(){
         $("#fetch_student").click(function(){
-            {% comment %} Accediendo a los valores desde su ID {% endcomment %}
-            
             var subject=$("#subject").val()
             var session_year=$("#session_year").val()
 
-            {% comment %} Creando jquery ajax request {% endcomment %}
             $.ajax({
                 url:'{% url 'get_students' %}',
                 type:'POST',
                 data:{subject:subject,session_year:session_year},
             })
-
-            {% comment %} Si el ajax request es success imprime el response, si no imprime el error {% endcomment %}
             .done(function(response){
                 var json_data=JSON.parse(response);
                 console.log(json_data)
@@ -103,32 +98,46 @@ Take Attendance
                 alert("Error in Fetching Student")
             })
 
-            $(document).om("click", "#save_attendance", function(){
-                console.log("Save")
-                var student_data=$("input[name='student_data[]']").map(function(){ return $(this).val(); }).get()
+
+            $(document).on("click","#save_attendance",function(){
+
+                $(this).attr("disabled","disabled")
+                $(this).text("Saving Attendance Data...")
+                var student_data=$("input[name='student_data[]']").map(function(){
+                        if($(this).is(":checked")){
+                            return {"id":$(this).val(),"status":1};
+                        }
+                        else{
+                            return {"id":$(this).val(),"status":0};
+                        }
+                 }).get()
                 var attendance_date=$("#attendance_date").val();
-                var subject_ids=$(#attendance_date).val(;)
-                var session_year_id=$(#session_year).val(;)
-                console.log(attendance_date);
-                console.log(student_data);
-            })
+                var subject_id=$("#subject").val();
+                var session_year_id=$("#session_year").val();
+                console.log(student_data)
+                {% comment %} convierte el student id en una string en formato JSOn {% endcomment %}
+                student_data=JSON.stringify(student_data)
 
                 $.ajax({
-                    url:'{% url 'save_attendance_data' %}',
-                    type:'POST',
-                    data:{subject:ids:student_data,attendance_date:attendance_date, subject_ids:subject_ids, session_year_id:session_year_id},
-                })
+                        url:'{% url 'save_attendance_data' %}',
+                        type:'POST',
+                        data:{student_ids:student_data,attendance_date:attendance_date,subject_id:subject_id,session_year_id:session_year_id},
+                    })
+                    .done(function(response){
 
-                .done(function(response){
-                    console.log(response)
-
-                })
-                .fail(function(){
-                    alert("Error in saving Student")
-                })
-
+                        if(response=="OK"){
+                            alert("Attendance Save")
+                        }
+                        else{
+                            alert("Error in Saving Data")
+                        }
+                        location.reload()
+                    })
+                    .fail(function(){
+                        alert("Error in Saving Student")
+                    })
+            })
         })
     })
-    
 </script>
 {% endblock custom_js %}

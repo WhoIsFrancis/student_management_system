@@ -3,7 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from student_management_app.models import SessionYearModel, Students, Subjects
+from student_management_app.models import Attendance, AttendanceReport, SessionYearModel, Students, Subjects
 
 def staff_home(request):
     return render(request,'staff_template/staff_home_template.html')
@@ -32,6 +32,7 @@ def get_students(request):
     return JsonResponse(json.dumps(list_data),content_type="application/json",safe=False)
 
 
+
 @csrf_exempt
 def save_attendance_data(request):
     student_ids=request.POST.get("student_ids")
@@ -56,4 +57,3 @@ def save_attendance_data(request):
         return HttpResponse("OK")
     except:
         return HttpResponse("ERR")
-   
