@@ -141,3 +141,11 @@ AUTH_USER_MODEL="student_management_app.CustomUser"
 
 # Registro del EmailBackend
 AUTHENTICATION_BACKENDS=['student_management_app.EmailBackend.EmailBackend']
+
+# Configuración de sesiones
+# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+# SESSION_COOKIE_NAME = 'sessionid'
+# SESSION_COOKIE_AGE = 1800  # 30 minutos en segundos
+# SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
+# SESSION_COOKIE_HTTPONLY = True
+# SESSION_COOKIE_SAMESITE = 'Lax'
