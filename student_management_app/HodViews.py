@@ -106,16 +106,16 @@ def add_student_save(request):
 
             # Subir archivo de img para el add_student_save, ya no es necesario subir una imagen para guardar
             # realizar condicion
-            # profile_pic_url = ""
-            # if 'profile_pic' in request.FILES and request.FILES['profiles_pic']:
-            #     profile_pic = request.FILES['profile_pic']
-            #     fs = FileSystemStorage()
-            #     filename = fs.save(profile_pic.name, profile_pic)
-            #     profile_pic_url = fs.url(filename)
-            profile_pic=request.FILES['profile_pic']
-            fs=FileSystemStorage()
-            filename=fs.save(profile_pic.name,profile_pic)
-            profile_pic_url=fs.url(filename)
+            profile_pic_url = ""
+            if 'profile_pic' in request.FILES and request.FILES['profiles_pic']:
+                profile_pic = request.FILES['profile_pic']
+                fs = FileSystemStorage()
+                filename = fs.save(profile_pic.name, profile_pic)
+                profile_pic_url = fs.url(filename)
+            # profile_pic=request.FILES['profile_pic']
+            # fs=FileSystemStorage()
+            # filename=fs.save(profile_pic.name,profile_pic)
+            # profile_pic_url=fs.url(filename)
 
 
             try:
