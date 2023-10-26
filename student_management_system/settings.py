@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,10 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tti!++@s3=s8f%59!k8$jb_uj@i-9ujw5=8=vxo(gev6qo4s@t'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -59,7 +63,7 @@ ROOT_URLCONF = 'student_management_system.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['student_management_app/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,11 +87,17 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'student_management_system',
-        'USER':'student_management_system',
-        'PASSWORD':'student_management_password',
-        'HOST':'localhost',
-        'PORT': '3306'
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT')
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'NAME': 'student_management_system',
+        # 'USER':'student_management_system',
+        # 'PASSWORD':'student_management_password',
+        # 'HOST':'localhost',
+        # 'PORT': '3306'
     }
 }
 
@@ -141,6 +151,20 @@ AUTH_USER_MODEL="student_management_app.CustomUser"
 
 # Registro del EmailBackend
 AUTHENTICATION_BACKENDS=['student_management_app.EmailBackend.EmailBackend']
+
+# Para probar si envia mails al resetear password
+# EMAIL_BACKEND="django.core.email.backends.filebased.EmailBackend"
+# EMAIL_FILE_PATH=os.path.join(BASE_DIR,'sent_mails')
+
+# Setiando el host y el port para enviar/recibir mails usando gmail o email
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_PORT=587  # For starttls
+EMAIL_HOST_USER= os.environ.get('GMAIL_EMAIL')
+EMAIL_HOST_PASSWORD= os.environ.get('GMAIL_PASSWORD')
+EMAIL_USE_TLS=True
+DEFAULT_FROM_FIELD="Student Management System <GMAIL_EMAIL>"
+
+
 
 # Configuración de sesiones
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
