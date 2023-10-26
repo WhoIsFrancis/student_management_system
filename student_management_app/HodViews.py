@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.urls import reverse
 from student_management_app.forms import AddStudentForm , EditStudentForm
+from django.views.decorators.csrf import csrf_exempt
 
 from student_management_app.models import CustomUser, SessionYearModel, Staffs, Courses, Students, Subjects
 from django.core.files.storage import FileSystemStorage
@@ -371,3 +372,24 @@ def add_session_save(request):
         except:
             messages.error(request, "Failed to Add Session")
             return HttpResponseRedirect(reverse("manage_session"))
+
+@csrf_exempt
+def check_email_exist(request):
+    email=request.POST.get('email')
+    user_obj=CustomUser.objects.filter(email=email).exists()
+
+    if user_obj:
+        return HttpResponse(True)
+    else:
+        return HttpResponse(False)
+    
+
+@csrf_exempt
+def check_username_exist(request):
+    username=request.POST.get('username')
+    user_obj=CustomUser.objects.filter(username=username).exists()
+
+    if user_obj:
+        return HttpResponse(True)
+    else:
+        return HttpResponse(False)
