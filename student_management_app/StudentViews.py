@@ -7,7 +7,13 @@ from django.urls import reverse
 from student_management_app.models import Attendance, AttendanceReport, Courses, CustomUser, FeedBackStudent, LeaveReportStudent, Students, Subjects
 
 def student_home(request):
-    return render(request,'student_template/student_home_template.html')
+    student_obj=Students.objects.get(admin=request.user.id)
+    attendance_total=AttendanceReport.objects.filter(student_id=student_obj).count()
+    attendance_present=AttendanceReport.objects.filter(student_id=student_obj, status=True).count()
+    attendance_absent=AttendanceReport.objects.filter(student_id=student_obj, status=False).count()
+    course=Courses.objects.get(id=student_obj.course_id.id)
+    subjects=AttendanceReport.objects.filter(student_id=student_obj, status=False).count()
+    return render(request,'student_template/student_home_template.html', {"total_attendance":attendance_total, "attendance_present":attendance_present, "attendance_absent":attendance_absent, "subjects": subjects})
 
 def student_view_attendance(request):
     student=Students.objects.get(admin=request.user.id)
