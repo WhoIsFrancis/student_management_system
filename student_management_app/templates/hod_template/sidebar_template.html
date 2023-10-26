@@ -139,7 +139,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url "add_staff" %}" class="nav-link {% if request.path == add_staff %} active {% endif %}">
+            {% url "student_leave_view" as student_leave_view %}
+            <a href="{% url "student_leave_view" %}" class="nav-link {% if request.path == student_leave_view %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Student Leave
@@ -147,7 +148,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url "add_staff" %}" class="nav-link {% if request.path == add_staff %} active {% endif %}">
+            {% url "staff_leave_view" as staff_leave_view %}
+            <a href="{% url "staff_leave_view" %}" class="nav-link {% if request.path == staff_leave_view %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Staff Leave
@@ -156,7 +158,8 @@
           </li>
 
           <li class="nav-item">
-            <a href="{% url "add_staff" %}" class="nav-link {% if request.path == add_staff %} active {% endif %}">
+            {% url "admin_view_attendance" as admin_view_attendance %}
+            <a href="{% url "admin_view_attendance" %}" class="nav-link {% if request.path == admin_view_attendance %} active {% endif %}">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 View Attendance
